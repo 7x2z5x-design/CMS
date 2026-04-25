@@ -15,11 +15,15 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        // User::factory(10)->create();
-
-        User::factory()->create([
-            'name' => 'Test User',
-            'email' => 'test@example.com',
-        ]);
+        // Create a default admin user for the CMS
+        User::updateOrCreate(
+            ['email' => 'admin@example.com'],
+            [
+                'name' => 'CMS Admin',
+                'password' => bcrypt('password'),
+                'role' => 'Admin',
+                'status' => 'Active',
+            ]
+        );
     }
 }

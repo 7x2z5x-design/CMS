@@ -2,61 +2,83 @@
 
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\DB;
-use App\Http\Controllers\HomeController; // 👈 NEW add
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\AdminController;
+use App\Http\Controllers\UserController;
+use App\Http\Controllers\ContentController;
+use App\Http\Controllers\CategoryController;
+use App\Http\Controllers\Admin\CategoryController as AdminCategoryController;
+use App\Http\Controllers\TagController;
+use App\Http\Controllers\MediaController;
+use App\Http\Controllers\AnalysisController;
+use App\Http\Controllers\SystemController;
+
+// Authentication routes
+Route::get('/login', [AuthController::class, 'showLoginForm'])->name('login');
+Route::post('/login', [AuthController::class, 'login'])->name('login.post');
+Route::get('/logout', [AuthController::class, 'logout'])->name('logout');
 
 Route::get('/register', [AuthController::class, 'showRegisterForm'])->name('register');
 Route::post('/register', [AuthController::class, 'register'])->name('register.post');
 
-Route::get('/login', [AuthController::class, 'showLoginForm'])->name('login');
-Route::post('/login', [AuthController::class, 'login'])->name('login.post');
+// Admin routes (protected by authentication)
+Route::middleware('auth')->prefix('admin')->name('admin.')->group(function () {
+    
+    // Main dashboard
+    Route::get('/dashboard', [AdminController::class, 'dashboard'])->name('dashboard');
+    
+    // User Management (Full CRUD)
+    Route::resource('users', UserController::class);
+    Route::post('/users/{user}/toggle-status', [UserController::class, 'toggleStatus'])->name('users.toggle-status');
 
-Route::get('/dashboard', [HomeController::class, 'index'])->middleware('auth')->name('dashboard');
-Route::get('/logout', [AuthController::class, 'logout'])->name('logout.get');
-Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
+    
+    // Multimedia Content Management
+    Route::post('/content/{content}/approve', [App\Http\Controllers\ContentController::class, 'approve'])->name('content.approve');
+    Route::post('/content/{content}/reject', [App\Http\Controllers\ContentController::class, 'reject'])->name('content.reject');
+    Route::resource('content', App\Http\Controllers\ContentController::class);
 
-// ── Post Routes (themed previews) ──
-Route::middleware('auth')->group(function () {
-    // Posts CRUD
-    Route::get('/posts', function () {
-        return view('posts.index');
-    })->name('posts.index');
 
-    Route::get('/posts/create', function () {
-        return view('posts.create');
-    })->name('posts.create');
 
-    Route::post('/posts', function () {
-        return redirect()->route('posts.index')->with('success', 'Post created successfully!');
-    })->name('posts.store');
+    
+    // Category Management
+    Route::resource('categories', CategoryController::class);
+    Route::post('/categories/{category}/toggle-status', [CategoryController::class, 'toggleStatus'])->name('categories.toggle-status');
+    Route::get('/categories/counts', [CategoryController::class, 'getCounts'])->name('categories.counts');
+    Route::post('/categories/bulk-delete', [CategoryController::class, 'bulkDelete'])->name('categories.bulk-delete');
+    Route::post('/categories/bulk-toggle-status', [CategoryController::class, 'bulkToggleStatus'])->name('categories.bulk-toggle-status');
+    Route::post('/categories/reorder', [CategoryController::class, 'reorder'])->name('categories.reorder');
+    Route::get('/categories/by-group/{group}', [CategoryController::class, 'getByGroup'])->name('categories.by-group');
 
-    Route::get('/posts/{id}/edit', function ($id) {
-        return view('posts.edit');
-    })->name('posts.edit');
 
-    Route::put('/posts/{id}', function ($id) {
-        return redirect()->route('posts.index')->with('success', 'Post updated successfully!');
-    })->name('posts.update');
+    
+    // Tag Management
+    Route::resource('tags', TagController::class);
 
-    Route::delete('/posts/{id}', function ($id) {
-        return redirect()->route('posts.index')->with('success', 'Post deleted.');
-    })->name('posts.destroy');
 
-    Route::get('/posts/review', function () {
-        return view('posts.review');
-    })->name('posts.review');
+    
+    // Media Management
+    Route::resource('media', MediaController::class);
+
+
+    
+    // Analysis (Simple Dashboard Page)
+    Route::get('/analysis', [AnalysisController::class, 'index'])->name('analysis.index');
+    
+    // System Control (Settings Page)
+    Route::prefix('system')->name('system.')->group(function () {
+        Route::get('/', [SystemController::class, 'index'])->name('index');
+        Route::post('/roles/{user}', [SystemController::class, 'updateRole'])->name('roles.update');
+        Route::post('/status/{user}', [SystemController::class, 'toggleUserStatus'])->name('status.toggle');
+        Route::post('/settings', [SystemController::class, 'updateSettings'])->name('settings.update');
+    });
 });
+
+// Redirect root to admin dashboard
 Route::get('/', function () {
-    return redirect()->route('dashboard');
+    return redirect()->route('admin.dashboard');
 });
 
-// ❌ OLD remove karo
-// Route::get('/', function () {
-//     return view('welcome');
-// });
-
-
-// 👇 isko rehne do (database test ke liye useful hai)
+// Database test route (keep for testing)
 Route::get('/db-test', function () {
     try {
         DB::connection()->getPdo();

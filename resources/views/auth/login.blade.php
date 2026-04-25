@@ -8,26 +8,28 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sign In — BlogCMS</title>
     <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect fill='%230D9488' width='32' height='32' rx='8'/><text x='16' y='22' font-size='18' font-weight='900' text-anchor='middle' fill='white' font-family='Inter,sans-serif'>B</text></svg>">
-    @vite(['resources/css/app.css', 'resources/js/app.js'])
+    <link rel="stylesheet" href="{{ asset('css/admin-saas.css') }}">
 </head>
 <body>
-<div class="auth-page">
+<div class="auth-page" style="background-color: var(--bg-color);">
+
     <div class="auth-container">
 
         {{-- Logo --}}
-        <div class="auth-logo">
-            <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
-                <rect width="32" height="32" rx="8" fill="#0D9488"/>
-                <path d="M8 10h16M8 16h12M8 22h8" stroke="white" stroke-width="2.5" stroke-linecap="round"/>
-            </svg>
-            BlogCMS
+        <div class="auth-logo" style="color: var(--primary); font-weight: 800; font-size: 2rem; letter-spacing: -1px;">
+            <i class="ph-fill ph-circles-four" style="margin-right: 0.5rem; color: var(--accent);"></i>
+            CMS Hub
         </div>
+
+
 
         {{-- Header --}}
         <div class="auth-header">
-            <h1>Welcome back</h1>
-            <p>Sign in to your account to continue creating</p>
+            <h1 style="color: var(--primary); font-weight: 900; letter-spacing: -0.5px;">Welcome Home</h1>
+            <p style="color: var(--text-muted);">Ready to curate something amazing today?</p>
         </div>
+
+
 
         {{-- Alerts --}}
         @if($errors->any())
@@ -52,8 +54,9 @@
         @endif
 
         {{-- Card --}}
-        <div class="auth-card">
-            <form method="POST" action="/login" novalidate>
+        <div class="auth-card" style="background: var(--card-bg); border-color: var(--border-color);">
+            <form method="POST" action="{{ route('login.post') }}" novalidate>
+
                 @csrf
 
                 {{-- Email --}}
@@ -110,16 +113,17 @@
                 </div>
 
                 {{-- Submit --}}
-                <button type="submit" class="btn btn-primary btn-block btn-lg">
-                    Sign In
+                <button type="submit" class="btn btn-accent btn-block btn-lg" style="border-radius: var(--radius-lg); font-weight: 900; letter-spacing: 1px; py: 1rem; color: var(--primary);">
+                    SIGN IN
                 </button>
+
+
             </form>
         </div>
 
         {{-- Footer --}}
-        <div class="auth-footer">
-            Don't have an account?
-            <a href="{{ route('register') }}">Create one for free</a>
+        <div class="auth-footer" style="font-size: 0.9rem; color: var(--clr-text-2);">
+            Need an account? Please contact an administrator.
         </div>
     </div>
 </div>
