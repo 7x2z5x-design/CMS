@@ -1,139 +1,214 @@
-{{-- ═══════════════════════════════════════════
-     REGISTER PAGE — Standalone auth layout
-════════════════════════════════════════════ --}}
 <!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Create Account — BlogCMS</title>
-    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect fill='%230D9488' width='32' height='32' rx='8'/><text x='16' y='22' font-size='18' font-weight='900' text-anchor='middle' fill='white' font-family='Inter,sans-serif'>B</text></svg>">
-    <link rel="stylesheet" href="{{ asset('css/admin-saas.css') }}">
+    <title>Register - BlogCMS</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .auth-container {
+            background: white;
+            padding: 2rem;
+            border-radius: 10px;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.1);
+            width: 100%;
+            max-width: 450px;
+        }
+        
+        .logo {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+        
+        .logo h1 {
+            color: #1a9e7a;
+            font-size: 2rem;
+            font-weight: 700;
+            letter-spacing: -1px;
+        }
+        
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: #333;
+            font-weight: 500;
+        }
+        
+        .form-control {
+            width: 100%;
+            padding: 0.75rem;
+            border: 2px solid #e1e5e9;
+            border-radius: 5px;
+            font-size: 1rem;
+            transition: border-color 0.3s ease;
+        }
+        
+        .form-control:focus {
+            outline: none;
+            border-color: #1a9e7a;
+        }
+        
+        .form-select {
+            width: 100%;
+            padding: 0.75rem;
+            border: 2px solid #e1e5e9;
+            border-radius: 5px;
+            font-size: 1rem;
+            background: white;
+            cursor: pointer;
+        }
+        
+        .btn {
+            width: 100%;
+            padding: 0.875rem;
+            border: none;
+            border-radius: 5px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+        
+        .btn-primary {
+            background-color: #1a9e7a;
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background-color: #158765;
+        }
+        
+        .text-danger {
+            color: #dc3545;
+            font-size: 0.875rem;
+            margin-top: 0.25rem;
+        }
+        
+        .auth-footer {
+            text-align: center;
+            margin-top: 1.5rem;
+            color: #666;
+        }
+        
+        .auth-footer a {
+            color: #1a9e7a;
+            text-decoration: none;
+            font-weight: 500;
+        }
+        
+        .auth-footer a:hover {
+            text-decoration: underline;
+        }
+        
+        .alert {
+            padding: 1rem;
+            margin-bottom: 1.5rem;
+            border-radius: 5px;
+            background-color: #f8d7da;
+            border: 1px solid #f5c6cb;
+            color: #721c24;
+        }
+        
+        .alert ul {
+            margin: 0;
+            padding-left: 1.5rem;
+        }
+    </style>
 </head>
 <body>
-<div class="auth-page" style="padding: var(--sp-8) var(--sp-6); align-items: flex-start; background-color: var(--bg-color);">
-    <div class="auth-container" style="max-width: 600px;">
-
-
-        {{-- Logo --}}
-        <div class="auth-logo" style="color: var(--primary); font-weight: 800; font-size: 2rem; letter-spacing: -1px;">
-            <i class="ph-fill ph-circles-four" style="margin-right: 0.5rem; color: var(--accent);"></i>
-            CMS Hub
+    <div class="auth-container">
+        <div class="logo">
+            <h1>BlogCMS</h1>
         </div>
-
-
-
-        {{-- Header --}}
-        <div class="auth-header">
-            <h1 style="color: var(--primary); font-weight: 900; letter-spacing: -1px;">Join the Hub</h1>
-            <p style="color: var(--text-muted);">Become part of a elite circle of creators and curators.</p>
-        </div>
-
-
-
-        {{-- Alerts --}}
-        @if($errors->any())
-            <div class="alert alert-danger fade-slide-in">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
-                <div>
-                    <strong>Please fix the following errors.</strong>
-                    <ul style="margin-top:0.25rem;">
-                        @foreach($errors->all() as $error)
-                            <li>{{ $error }}</li>
-                        @endforeach
-                    </ul>
-                </div>
+        
+        @if(session('success'))
+            <div class="alert">
+                {{ session('success') }}
             </div>
         @endif
-
-        {{-- Card --}}
-        <div class="auth-card" style="background: var(--card-bg); border-color: var(--border-color);">
-
-            <form method="POST" action="{{ route('register.post') }}" novalidate>
-                @csrf
-
-                <div class="mb-3">
-                    <label for="name" class="form-label">Name</label>
-                    <input type="text" class="form-control" id="name" name="name" value="{{ old('name') }}" required>
-                    @error('name')
-                        <div class="text-danger">{{ $message }}</div>
-                    @enderror
-                </div>
-
-                <div class="mb-3">
-                    <label for="email" class="form-label">Email</label>
-                    <input type="email" class="form-control" id="email" name="email" value="{{ old('email') }}" required>
-                    @error('email')
-                        <div class="text-danger">{{ $message }}</div>
-                    @enderror
-                </div>
-
-                <div class="mb-3">
-                    <label for="password" class="form-label">Password</label>
-                    <input type="password" class="form-control" id="password" name="password" required>
-                    @error('password')
-                        <div class="text-danger">{{ $message }}</div>
-                    @enderror
-                </div>
-
-                <div class="mb-3">
-                    <label for="password_confirmation" class="form-label">Confirm Password</label>
-                    <input type="password" class="form-control" id="password_confirmation" name="password_confirmation" required>
-                </div>
-
-                <div class="mb-3">
-                    <label for="role" class="form-label" style="font-weight: 500; font-size: 0.9rem; color: var(--clr-text-1);">Role</label>
-                    <select class="form-select {{ $errors->has('role') ? 'is-invalid' : '' }}" id="role" name="role" required style="width: 100%; padding: 0.75rem 1rem; border: 1px solid var(--clr-border); border-radius: 0.5rem;">
-                        <option value="" disabled selected>Select a Role</option>
-                        @foreach($roles as $role)
-                            <option value="{{ $role }}" {{ old('role') == $role ? 'selected' : '' }}>
-                                @if($role == 'Admin') Admin (Master Controller)
-                                @elseif($role == 'Editor') Editor (Full Management)
-                                @elseif($role == 'Publisher') Publisher (Quality Control)
-                                @elseif($role == 'Author') Author (Content Creator)
-                                @else Viewer (Read Only View)
-                                @endif
-                            </option>
-                        @endforeach
-
-                    </select>
-                    @error('role')
-                        <div class="form-error" style="color: var(--danger); font-size: 0.8rem; margin-top: 0.25rem;">
-                            {{ $message }}
-                        </div>
-                    @enderror
-                </div>
-
-                <button type="submit" class="btn btn-accent btn-block btn-lg" style="border-radius: var(--radius-lg); font-weight: 900; letter-spacing: 1px; color: var(--primary);">
-                    GET STARTED
-                </button>
-
-
-            </form>
-        </div>
-
-        {{-- Footer --}}
+        
+        @if($errors->any())
+            <div class="alert">
+                <strong>Please fix the following errors:</strong>
+                <ul>
+                    @foreach($errors->all() as $error)
+                        <li>{{ $error }}</li>
+                    @endforeach
+                </ul>
+            </div>
+        @endif
+        
+        <form method="POST" action="{{ route('register.post') }}">
+            @csrf
+            
+            <div class="form-group">
+                <label for="name">Full Name</label>
+                <input type="text" id="name" name="name" class="form-control" value="{{ old('name') }}" required>
+                @error('name')
+                    <div class="text-danger">{{ $message }}</div>
+                @enderror
+            </div>
+            
+            <div class="form-group">
+                <label for="email">Email</label>
+                <input type="email" id="email" name="email" class="form-control" value="{{ old('email') }}" required>
+                @error('email')
+                    <div class="text-danger">{{ $message }}</div>
+                @enderror
+            </div>
+            
+            <div class="form-group">
+                <label for="password">Password</label>
+                <input type="password" id="password" name="password" class="form-control" required>
+                @error('password')
+                    <div class="text-danger">{{ $message }}</div>
+                @enderror
+            </div>
+            
+            <div class="form-group">
+                <label for="password_confirmation">Confirm Password</label>
+                <input type="password" id="password_confirmation" name="password_confirmation" class="form-control" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="role">Role</label>
+                <select id="role" name="role" class="form-select" required>
+                    <option value="">Select a role</option>
+                    @foreach($roles as $role)
+                        <option value="{{ $role }}" {{ old('role') == $role ? 'selected' : '' }}>
+                            {{ ucfirst($role) }}
+                        </option>
+                    @endforeach
+                </select>
+                @error('role')
+                    <div class="text-danger">{{ $message }}</div>
+                @enderror
+            </div>
+            
+            <button type="submit" class="btn btn-primary">Register</button>
+        </form>
+        
         <div class="auth-footer">
-            Already have an account? <a href="{{ route('login') }}">Sign in here</a>
+            Already have an account? <a href="{{ route('login') }}">Login here</a>
         </div>
     </div>
-</div>
-
-<script>
-    function previewImage(input) {
-        const preview = document.getElementById('imagePreview');
-        preview.innerHTML = '';
-        if (input.files && input.files[0]) {
-            const reader = new FileReader();
-            reader.onload = function (e) {
-                preview.innerHTML = `
-                    <img src="${e.target.result}" alt="Preview"
-                         style="width:80px;height:80px;border-radius:50%;object-fit:cover;border:3px solid var(--clr-primary);box-shadow:var(--shadow-md);">
-                    <p class="text-xs" style="color:var(--clr-success);font-weight:600;margin-top:0.5rem;">✓ Image ready</p>`;
-            };
-            reader.readAsDataURL(input.files[0]);
-        }
-    }
-</script>
 </body>
 </html>

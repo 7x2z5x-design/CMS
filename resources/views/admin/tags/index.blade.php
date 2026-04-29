@@ -105,9 +105,6 @@
                     <tr>
                         <th>Tag Name</th>
                         <th>Slug</th>
-                        <th>Color</th>
-                        <th>Posts Count</th>
-                        <th>Status</th>
                         <th>Created Date</th>
                         <th>Actions</th>
                     </tr>
@@ -117,30 +114,11 @@
                         <tr class="table-row">
                             <td>
                                 <div class="user-name">{{ $tag->name }}</div>
-                                @if($tag->description)
-                                    <div class="user-email">{{ \Illuminate\Support\Str::limit($tag->description, 50) }}</div>
-                                @endif
                             </td>
                             <td>
                                 <code style="background: #f0ede4; padding: 0.25rem 0.5rem; border-radius: 4px; font-size: 0.875rem;">
                                     {{ $tag->slug }}
                                 </code>
-                            </td>
-                            <td>
-                                <div class="color-dot" style="background-color: {{ $tag->color ?? '#6B7B3A' }};"></div>
-                            </td>
-                            <td>
-                                <span class="role-badge">{{ $tag->post_count ?? 0 }}</span>
-                            </td>
-                            <td>
-                                <button 
-                                    class="status-toggle" 
-                                    data-id="{{ $tag->id }}" 
-                                    data-status="{{ $tag->status }}"
-                                    style="background: {{ $tag->status === 'active' ? '#10B981' : '#6B7280' }}; color: white; border: none; padding: 0.25rem 0.75rem; border-radius: 12px; cursor: pointer; font-size: 0.875rem; font-weight: 600; transition: all 0.3s;"
-                                >
-                                    {{ ucfirst($tag->status) }}
-                                </button>
                             </td>
                             <td>
                                 <div class="joined-date">{{ $tag->created_at ? $tag->created_at->format('M d, Y') : 'N/A' }}</div>

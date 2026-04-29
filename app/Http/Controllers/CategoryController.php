@@ -70,8 +70,6 @@ class CategoryController extends Controller
             'category_group' => 'required|string|in:' . implode(',', array_keys(Category::CATEGORY_GROUPS)),
             'color' => 'nullable|string|max:7',
             'status' => 'required|in:active,inactive',
-            'seo_title' => 'nullable|string|max:255',
-            'seo_description' => 'nullable|string|max:500',
             'featured_image' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
         ]);
 
@@ -128,8 +126,6 @@ class CategoryController extends Controller
             'category_group' => 'required|string|in:' . implode(',', array_keys(Category::CATEGORY_GROUPS)),
             'color' => 'nullable|string|max:7',
             'status' => 'required|in:active,inactive',
-            'seo_title' => 'nullable|string|max:255',
-            'seo_description' => 'nullable|string|max:500',
             'featured_image' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
             'display_order' => 'nullable|integer|min:0',
         ]);

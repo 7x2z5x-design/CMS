@@ -136,37 +136,6 @@
     </div>
     
     <div class="col-lg-4">
-        <div class="card">
-            <div class="card-header">
-                <h5 class="card-title mb-0">SEO Settings</h5>
-            </div>
-            <div class="card-body">
-                <div class="form-group mb-3">
-                    <label for="seo_title" class="form-label">SEO Title</label>
-                    <input type="text" 
-                           name="seo_title" 
-                           id="seo_title" 
-                           class="form-control" 
-                           value="{{ old('seo_title') }}" 
-                           placeholder="SEO title for search engines">
-                    @error('seo_title') 
-                        <div class="invalid-feedback d-block">{{ $message }}</div> 
-                    @enderror
-                </div>
-                
-                <div class="form-group mb-3">
-                    <label for="seo_description" class="form-label">SEO Description</label>
-                    <textarea name="seo_description" 
-                              id="seo_description" 
-                              class="form-control" 
-                              rows="3" 
-                              placeholder="SEO description for search engines">{{ old('seo_description') }}</textarea>
-                    @error('seo_description') 
-                        <div class="invalid-feedback d-block">{{ $message }}</div> 
-                    @enderror
-                </div>
-            </div>
-        </div>
         
         <div class="card">
             <div class="card-header">

@@ -5,7 +5,7 @@
 
     {{-- Brand Logo --}}
     <div class="navbar-logo">
-        <a href="{{ route('dashboard') }}">
+        <a href="{{ auth()->check() && auth()->user()->isAuthor() ? route('author.dashboard') : route('admin.dashboard') }}">
             <svg width="28" height="28" viewBox="0 0 32 32" fill="none">
                 <rect width="32" height="32" rx="8" fill="#0D9488"/>
                 <path d="M8 10h16M8 16h12M8 22h8" stroke="white" stroke-width="2.5" stroke-linecap="round"/>
@@ -36,12 +36,12 @@
 
             {{-- Avatar --}}
             <div class="navbar-avatar">
-                @if(auth()->user()->ProfilePicture)
-                    <img src="{{ str_contains(auth()->user()->ProfilePicture, 'http') ? auth()->user()->ProfilePicture : asset('storage/' . auth()->user()->ProfilePicture) }}"
-                         alt="{{ auth()->user()->Username }}"
+                @if(auth()->user()->profile_photo)
+                    <img src="{{ str_contains(auth()->user()->profile_photo, 'http') ? auth()->user()->profile_photo : asset('storage/' . auth()->user()->profile_photo) }}"
+                         alt="{{ auth()->user()->name }}"
                          style="width:100%; height:100%; object-fit:cover; border-radius:50%;">
                 @else
-                    {{ strtoupper(substr(auth()->user()->Username ?? 'U', 0, 1)) }}
+                    {{ auth()->user()->initials }}
                 @endif
             </div>
 
@@ -52,16 +52,19 @@
                 </button>
 
                 <div class="dropdown-menu" id="navbar-dropdown-menu">
-                    @if(Route::has('dashboard'))
-                    <a href="{{ route('dashboard') }}" class="dropdown-item">
+                    @if(auth()->check() && auth()->user()->isAuthor())
+                    <a href="{{ route('author.dashboard') }}" class="dropdown-item">
                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
                         Dashboard
                     </a>
-                    @endif
-                    @if(Route::has('profile'))
-                    <a href="{{ route('profile') }}" class="dropdown-item">
+                    <a href="{{ route('author.profile.show') }}" class="dropdown-item">
                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-                        Profile Settings
+                        My Profile
+                    </a>
+                    @else
+                    <a href="{{ route('admin.dashboard') }}" class="dropdown-item">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+                        Dashboard
                     </a>
                     @endif
                     @if(Route::has('settings'))

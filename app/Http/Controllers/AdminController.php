@@ -24,11 +24,19 @@ class AdminController extends Controller
         
         $recentUsers = User::latest()->take(5)->get();
         
+        // Get additional statistics
+        $totalPosts = \App\Models\Content::where('content_type', 'post')->count();
+        $totalCategories = \App\Models\Category::count();
+        $totalTags = \App\Models\Tag::count();
+        
         return view('admin.dashboard', compact(
             'totalUsers',
             'activeUsers', 
             'inactiveUsers',
-            'recentUsers'
+            'recentUsers',
+            'totalPosts',
+            'totalCategories',
+            'totalTags'
         ));
     }
 

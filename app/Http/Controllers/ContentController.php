@@ -28,12 +28,24 @@ class ContentController extends Controller
                 $q->where('categories.id', $request->category_id);
             });
         }
+        
+        // Author filtering
+        if ($request->filled('author_id')) {
+            $query->where('user_id', $request->author_id);
+        }
 
 
         $contents = $query->latest()->paginate(12); // Smaller pagination for grid
         $contents->appends($request->all());
 
         $categories = Category::orderBy('name')->get();
+        
+        // Get authors who have posts for dropdown
+        $authors = \App\Models\User::whereHas('contents', function($q) {
+                $q->where('content_type', 'post');
+            })
+            ->orderBy('name')
+            ->get();
         
         // Stats for the header
         $stats = [

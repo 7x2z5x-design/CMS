@@ -1,131 +1,188 @@
-{{-- ═══════════════════════════════════════════
-     LOGIN PAGE — Standalone auth layout
-════════════════════════════════════════════ --}}
 <!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sign In — BlogCMS</title>
-    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect fill='%230D9488' width='32' height='32' rx='8'/><text x='16' y='22' font-size='18' font-weight='900' text-anchor='middle' fill='white' font-family='Inter,sans-serif'>B</text></svg>">
-    <link rel="stylesheet" href="{{ asset('css/admin-saas.css') }}">
+    <title>Login - BlogCMS</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .auth-container {
+            background: white;
+            padding: 2rem;
+            border-radius: 10px;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.1);
+            width: 100%;
+            max-width: 450px;
+        }
+        
+        .logo {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+        
+        .logo h1 {
+            color: #1a9e7a;
+            font-size: 2rem;
+            font-weight: 700;
+            letter-spacing: -1px;
+        }
+        
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: #333;
+            font-weight: 500;
+        }
+        
+        .form-control {
+            width: 100%;
+            padding: 0.75rem;
+            border: 2px solid #e1e5e9;
+            border-radius: 5px;
+            font-size: 1rem;
+            transition: border-color 0.3s ease;
+        }
+        
+        .form-control:focus {
+            outline: none;
+            border-color: #1a9e7a;
+        }
+        
+        .btn {
+            width: 100%;
+            padding: 0.875rem;
+            border: none;
+            border-radius: 5px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+        
+        .btn-primary {
+            background-color: #1a9e7a;
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background-color: #158765;
+        }
+        
+        .text-danger {
+            color: #dc3545;
+            font-size: 0.875rem;
+            margin-top: 0.25rem;
+        }
+        
+        .auth-footer {
+            text-align: center;
+            margin-top: 1.5rem;
+            color: #666;
+        }
+        
+        .auth-footer a {
+            color: #1a9e7a;
+            text-decoration: none;
+            font-weight: 500;
+        }
+        
+        .auth-footer a:hover {
+            text-decoration: underline;
+        }
+        
+        .alert {
+            padding: 1rem;
+            margin-bottom: 1.5rem;
+            border-radius: 5px;
+            background-color: #f8d7da;
+            border: 1px solid #f5c6cb;
+            color: #721c24;
+        }
+        
+        .checkbox-group {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 1.5rem;
+        }
+        
+        .checkbox-group input[type="checkbox"] {
+            width: auto;
+            margin: 0;
+        }
+    </style>
 </head>
 <body>
-<div class="auth-page" style="background-color: var(--bg-color);">
-
     <div class="auth-container">
-
-        {{-- Logo --}}
-        <div class="auth-logo" style="color: var(--primary); font-weight: 800; font-size: 2rem; letter-spacing: -1px;">
-            <i class="ph-fill ph-circles-four" style="margin-right: 0.5rem; color: var(--accent);"></i>
-            CMS Hub
+        <div class="logo">
+            <h1>BlogCMS</h1>
         </div>
-
-
-
-        {{-- Header --}}
-        <div class="auth-header">
-            <h1 style="color: var(--primary); font-weight: 900; letter-spacing: -0.5px;">Welcome Home</h1>
-            <p style="color: var(--text-muted);">Ready to curate something amazing today?</p>
-        </div>
-
-
-
-        {{-- Alerts --}}
-        @if($errors->any())
-            <div class="alert alert-danger fade-slide-in">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
-                <div>
-                    <strong>Login failed.</strong>
-                    <ul style="margin-top:0.25rem;">
-                        @foreach($errors->all() as $error)
-                            <li>{{ $error }}</li>
-                        @endforeach
-                    </ul>
-                </div>
-            </div>
-        @endif
-
+        
         @if(session('success'))
-            <div class="alert alert-success fade-slide-in">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
-                <div><strong>Success!</strong> {{ session('success') }}</div>
+            <div class="alert">
+                {{ session('success') }}
             </div>
         @endif
-
-        {{-- Card --}}
-        <div class="auth-card" style="background: var(--card-bg); border-color: var(--border-color);">
-            <form method="POST" action="{{ route('login.post') }}" novalidate>
-
-                @csrf
-
-                {{-- Email --}}
-                <div class="form-group">
-                    <label for="Email">Email Address</label>
-                    <input
-                        type="email"
-                        class="form-control {{ $errors->has('Email') ? 'is-invalid' : '' }}"
-                        id="Email"
-                        name="Email"
-                        value="{{ old('Email') }}"
-                        placeholder="you@example.com"
-                        autocomplete="email"
-                        required>
-                    @error('Email')
-                        <div class="form-error">
-                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-                            {{ $message }}
-                        </div>
-                    @enderror
-                </div>
-
-                {{-- Password --}}
-                <div class="form-group">
-                    <div class="flex-between mb-sm">
-                        <label for="password" style="margin-bottom:0;">Password</label>
-                        @if(Route::has('password.request'))
-                        <a href="{{ route('password.request') }}" class="text-xs" style="color:var(--clr-primary); font-weight:600;">Forgot password?</a>
-                        @endif
-                    </div>
-                    <input
-                        type="password"
-                        class="form-control {{ $errors->has('password') ? 'is-invalid' : '' }}"
-                        id="password"
-                        name="password"
-                        placeholder="Your password"
-                        autocomplete="current-password"
-                        required>
-                    @error('password')
-                        <div class="form-error">
-                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-                            {{ $message }}
-                        </div>
-                    @enderror
-                </div>
-
-                {{-- Remember me --}}
-                <div class="form-group" style="margin-bottom: var(--sp-6);">
-                    <label style="display:flex; align-items:center; gap:var(--sp-2); cursor:pointer; font-weight:400; margin-bottom:0; font-size:0.9rem; color:var(--clr-text-2);">
-                        <input type="checkbox" name="remember" id="remember"
-                            style="width:16px;height:16px;border-radius:4px; cursor:pointer; accent-color:var(--clr-primary);">
-                        Keep me signed in
-                    </label>
-                </div>
-
-                {{-- Submit --}}
-                <button type="submit" class="btn btn-accent btn-block btn-lg" style="border-radius: var(--radius-lg); font-weight: 900; letter-spacing: 1px; py: 1rem; color: var(--primary);">
-                    SIGN IN
-                </button>
-
-
-            </form>
-        </div>
-
-        {{-- Footer --}}
-        <div class="auth-footer" style="font-size: 0.9rem; color: var(--clr-text-2);">
-            Need an account? Please contact an administrator.
+        
+        @if($errors->any())
+            <div class="alert">
+                <strong>Login failed:</strong>
+                <ul>
+                    @foreach($errors->all() as $error)
+                        <li>{{ $error }}</li>
+                    @endforeach
+                </ul>
+            </div>
+        @endif
+        
+        <form method="POST" action="{{ route('login.post') }}">
+            @csrf
+            
+            <div class="form-group">
+                <label for="email">Email</label>
+                <input type="email" id="email" name="email" class="form-control" value="{{ old('email') }}" required>
+                @error('email')
+                    <div class="text-danger">{{ $message }}</div>
+                @enderror
+            </div>
+            
+            <div class="form-group">
+                <label for="password">Password</label>
+                <input type="password" id="password" name="password" class="form-control" required>
+                @error('password')
+                    <div class="text-danger">{{ $message }}</div>
+                @enderror
+            </div>
+            
+            <div class="checkbox-group">
+                <input type="checkbox" id="remember" name="remember">
+                <label for="remember">Remember me</label>
+            </div>
+            
+            <button type="submit" class="btn btn-primary">Login</button>
+        </form>
+        
+        <div class="auth-footer">
+            Don't have an account? <a href="{{ route('register') }}">Register here</a>
         </div>
     </div>
-</div>
 </body>
 </html>

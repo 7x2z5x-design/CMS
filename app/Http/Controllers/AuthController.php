@@ -12,82 +12,65 @@ use Illuminate\Support\Str;
 class AuthController extends Controller
 {
     // Allowed roles for registration (matching the new CMS schema)
-    private const ALLOWED_ROLES = ['Admin', 'Editor', 'Viewer'];
+    private const ALLOWED_ROLES = ['Admin', 'Author', 'Reader'];
 
-    public function showRegisterForm()
+    public function showRegister()
     {
         return view('auth.register', ['roles' => self::ALLOWED_ROLES]);
     }
 
     public function register(Request $request)
     {
-        // Define validation rules
-        $validator = Validator::make($request->all(), [
-            'name' => 'required|string|max:100',
-            'email' => 'required|string|email|max:100|unique:users,email',
-            'password' => 'required|string|min:6|confirmed',
-            'role' => 'required|string|in:' . implode(',', self::ALLOWED_ROLES),
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'email' => 'required|string|email|max:255|unique:users',
+            'password' => 'required|string|min:8|confirmed',
+            'role' => 'required|in:' . implode(',', self::ALLOWED_ROLES),
         ]);
 
-        if ($validator->fails()) {
-            return redirect()->back()
-                ->withErrors($validator)
-                ->withInput();
-        }
+        User::create([
+            'name' => $request->name,
+            'email' => $request->email,
+            'password' => Hash::make($request->password),
+            'role' => $request->role ?? 'Author',
+            'status' => 'Active',
+        ]);
 
-        try {
-            User::create([
-                'name' => $request->name,
-                'email' => $request->email,
-                'password' => Hash::make($request->password),
-                'role' => $request->role,
-                'status' => 'Active',
-            ]);
-
-            return redirect()->route('login')->with('success', 'Registration successful! Please login.');
-        } catch (\Exception $e) {
-            return redirect()->back()
-                ->withErrors(['error' => 'Registration failed. Please try again.'])
-                ->withInput();
-        }
+        return redirect()->route('login')->with('success', 'Registration successful! Please login.');
     }
 
-    public function showLoginForm()
+    public function showLogin()
     {
         return view('auth.login');
     }
 
     public function login(Request $request)
     {
-        $validator = Validator::make($request->all(), [
-            'Email' => 'required|string|email|max:100',
-            'password' => 'required|string|min:8',
+        $request->validate([
+            'email' => 'required|email',
+            'password' => 'required',
         ]);
 
-        if ($validator->fails()) {
-            return redirect()->back()
-                ->withErrors($validator)
-                ->withInput();
-        }
-
-        $credentials = [
-            'email' => $request->input('Email'),
-            'password' => $request->input('password')
-        ];
+        $credentials = $request->only('email', 'password');
         $remember = $request->boolean('remember');
 
         if (Auth::attempt($credentials, $remember)) {
             $user = Auth::user();
-            if (strtolower($user->status) !== 'active') {
-                Auth::logout();
-                return back()->withErrors(['login' => 'Your account is inactive.'])->withInput();
+            
+            // Redirect based on role
+            switch ($user->role) {
+                case 'admin':
+                    return redirect()->route('admin.dashboard');
+                case 'author':
+                    return redirect()->route('author.posts');
+                case 'reader':
+                    return redirect('/');
+                default:
+                    return redirect('/');
             }
-
-            // All registered users (Admin, Editor, Viewer etc.) are redirected to the main dashboard
-            return redirect()->route('admin.dashboard');
         }
 
-        return back()->withErrors(['login' => 'Invalid email or password.'])->withInput();
+        return back()->withErrors(['email' => 'Invalid credentials'])->withInput();
     }
 
     public function logout(Request $request)

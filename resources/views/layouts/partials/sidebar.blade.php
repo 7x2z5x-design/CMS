@@ -6,19 +6,51 @@
 
         {{-- ── MAIN ── --}}
         <ul class="sidebar-nav">
-            <li class="sidebar-nav-item">
-                <a href="{{ route('dashboard') }}"
-                   class="sidebar-nav-link {{ request()->routeIs('dashboard') ? 'active' : '' }}">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/>
-                        <rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/>
-                    </svg>
-                    <span>Dashboard</span>
-                </a>
-            </li>
+            @if(auth()->check() && auth()->user()->isAuthor())
+                <li class="sidebar-nav-item">
+                    <a href="{{ route('author.dashboard') }}"
+                       class="sidebar-nav-link {{ request()->routeIs('author.dashboard') ? 'active' : '' }}">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/>
+                            <rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/>
+                        </svg>
+                        <span>Author Dashboard</span>
+                    </a>
+                </li>
+                <li class="sidebar-nav-item">
+                    <a href="{{ route('author.posts.index') }}"
+                       class="sidebar-nav-link {{ request()->routeIs('author.posts.*') ? 'active' : '' }}">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>
+                        </svg>
+                        <span>My Posts</span>
+                    </a>
+                </li>
+                <li class="sidebar-nav-item">
+                    <a href="{{ route('author.profile.show') }}"
+                       class="sidebar-nav-link {{ request()->routeIs('author.profile.*') ? 'active' : '' }}">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>
+                        </svg>
+                        <span>My Profile</span>
+                    </a>
+                </li>
+            @else
+                <li class="sidebar-nav-item">
+                    <a href="{{ route('admin.dashboard') }}"
+                       class="sidebar-nav-link {{ request()->routeIs('admin.dashboard') ? 'active' : '' }}">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/>
+                            <rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/>
+                        </svg>
+                        <span>Dashboard</span>
+                    </a>
+                </li>
+            @endif
         </ul>
 
         {{-- ── CONTENT ── --}}
+        @if(!auth()->user()->isAuthor())
         <span class="sidebar-section-title">Content</span>
         <ul class="sidebar-nav">
             @if(Route::has('posts.index'))
@@ -88,6 +120,19 @@
             </li>
             @endif
 
+            @if(Route::has('author.media.index'))
+            <li class="sidebar-nav-item">
+                <a href="{{ route('author.media.index') }}"
+                   class="sidebar-nav-link {{ request()->routeIs('author.media.*') ? 'active' : '' }}">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/>
+                        <polyline points="21 15 16 10 5 21"/>
+                    </svg>
+                    <span>Media Library</span>
+                </a>
+            </li>
+            @endif
+
             @if(Route::has('comments.index'))
             <li class="sidebar-nav-item">
                 <a href="{{ route('comments.index') }}"
@@ -113,6 +158,7 @@
             </li>
             @endif
         </ul>
+        @endif
 
         {{-- ── ACCOUNT ── --}}
         <span class="sidebar-section-title">Account</span>

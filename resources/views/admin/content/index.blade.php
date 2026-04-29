@@ -107,20 +107,36 @@
         </form>
         
         <select 
+            name="author_id" 
+            onchange="this.form.submit()" 
+            style="padding: 0.75rem 1rem; border: 1px solid #E5E7EB; border-radius: 0.5rem; background: white; backdrop-filter: blur(10px);"
+        >
+            <option value="">All Authors</option>
+            @if(isset($authors))
+                @foreach($authors as $author)
+                    <option value="{{ $author->id }}" {{ request('author_id') == $author->id ? 'selected' : '' }}>
+                        {{ $author->name }}
+                    </option>
+                @endforeach
+            @endif
+        </select>
+        
+        <select 
             name="status" 
             onchange="this.form.submit()" 
-            style="padding: 0.75rem 1rem; border: 1px solid #E5E7EB; border-radius: 0.5rem; background: white;"
+            style="padding: 0.75rem 1rem; border: 1px solid #E5E7EB; border-radius: 0.5rem; background: white; backdrop-filter: blur(10px);"
         >
-            <option value="">All Status</option>
-            <option value="published" {{ request('status') == 'published' ? 'selected' : '' }}">Published</option>
-            <option value="draft" {{ request('status') == 'draft' ? 'selected' : '' }}">Draft</option>
-            <option value="scheduled" {{ request('status') == 'scheduled' ? 'selected' : '' }}">Scheduled</option>
-            <option value="archived" {{ request('status') == 'archived' ? 'selected' : '' }}">Archived</option>
+            <option value="">All Statuses</option>
+            <option value="published" {{ request('status') == 'published' ? 'selected' : '' }}>Published</option>
+            <option value="draft" {{ request('status') == 'draft' ? 'selected' : '' }}>Draft</option>
+            <option value="scheduled" {{ request('status') == 'scheduled' ? 'selected' : '' }}>Scheduled</option>
+            <option value="archived" {{ request('status') == 'archived' ? 'selected' : '' }}>Archived</option>
         </select>
         
         <select 
             name="category" 
             onchange="this.form.submit()" 
+            style="padding: 0.75rem 1rem; border: 1px solid #E5E7EB; border-radius: 0.5rem; background: white; backdrop-filter: blur(10px);"
             style="padding: 0.75rem 1rem; border: 1px solid #E5E7EB; border-radius: 0.5rem; background: white;"
         >
             <option value="">All Categories</option>

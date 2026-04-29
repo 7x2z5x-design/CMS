@@ -36,12 +36,14 @@
                             </div>
                         </td>
                         <td>
-                            @if($user->role == 'Admin')
-                              <span class="badge badge-primary">Admin</span>
-                            @elseif($user->role == 'Editor')
+                            @if($user->role == 'Editor')
                               <span class="badge badge-warning">Editor</span>
+                            @elseif($user->role == 'Author')
+                              <span class="badge badge-primary">Author</span>
+                            @elseif($user->role == 'Publisher')
+                              <span class="badge badge-success">Publisher</span>
                             @else
-                              <span class="badge " style="background: var(--border-color); color: var(--text-primary);">Viewer</span>
+                              <span class="badge" style="background: var(--border-color); color: var(--text-primary);">Viewer</span>
                             @endif
                         </td>
                         <td>

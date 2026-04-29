@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
-class Content extends Model
+class Post extends Model
 {
     use HasFactory, SoftDeletes;
 
@@ -19,12 +19,16 @@ class Content extends Model
         'file_path',
         'content_type',
         'user_id',
-        'status',
-        'published_at',
-        'external_url',
-        'media_id'
+        'status'
     ];
 
+    /**
+     * Scope to query only posts (not other content types)
+     */
+    public function scopePosts($query)
+    {
+        return $query->where('content_type', 'post');
+    }
 
     public function user()
     {
@@ -36,39 +40,9 @@ class Content extends Model
         return $this->belongsToMany(Category::class, 'category_content');
     }
 
-
     public function tags()
     {
         return $this->belongsToMany(Tag::class, 'content_tag');
-    }
-
-    /**
-     * Get the linked media for this content
-     */
-    public function linkedMedia()
-    {
-        return $this->belongsTo(Content::class, 'media_id');
-    }
-
-    /**
-     * Get all media items that can be linked (excluding this item)
-     */
-    public function getAvailableMediaAttribute()
-    {
-        return Content::where('user_id', $this->user_id)
-            ->whereNotNull('file_path')
-            ->where('content_type', '!=', 'video')
-            ->where('id', '!=', $this->id)
-            ->latest()
-            ->get();
-    }
-
-    /**
-     * Get the revisions for this content.
-     */
-    public function revisions()
-    {
-        return $this->hasMany(PostRevision::class, 'post_id')->latest();
     }
 
     /**
