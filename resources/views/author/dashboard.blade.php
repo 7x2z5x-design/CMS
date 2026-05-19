@@ -48,37 +48,36 @@
 
     <div class="card">
         <div class="card-header">
-            <h4>Your Latest Posts</h4>
+            <h4>Your Draft Posts</h4>
         </div>
         <div class="card-body">
-            @if($latestPosts->count() > 0)
+            @if($drafts->count() > 0)
                 <div class="table-responsive">
                     <table class="table table-bordered table-striped">
                         <thead>
                             <tr>
-                                <th>Title</th>
+                                <th>Post Title</th>
+                                <th>Date Created</th>
                                 <th>Status</th>
-                                <th>Date</th>
                                 <th>Actions</th>
                             </tr>
                         </thead>
                         <tbody>
-                            @foreach($latestPosts as $post)
+                            @foreach($drafts as $draft)
                                 <tr>
-                                    <td>{{ $post->title }}</td>
+                                    <td>{{ $draft->title }}</td>
+                                    <td>{{ $draft->created_at->format('M d, Y') }}</td>
                                     <td>
-                                        <span class="badge bg-{{ $post->status == 'approved' ? 'success' : ($post->status == 'draft' ? 'warning' : 'secondary') }}">
-                                            {{ ucfirst($post->status) }}
+                                        <span class="badge" style="background-color: #FFC107; color: #000;">
+                                            {{ ucfirst($draft->status) }}
                                         </span>
                                     </td>
-                                    <td>{{ $post->created_at->format('M d, Y') }}</td>
                                     <td>
-                                        <a href="{{ route('author.posts.show', $post->id) }}" class="btn btn-sm btn-info">View</a>
-                                        <a href="{{ route('author.posts.edit', $post->id) }}" class="btn btn-sm btn-primary">Edit</a>
-                                        <form action="{{ route('author.posts.destroy', $post->id) }}" method="POST" style="display: inline;">
+                                        <a href="{{ route('author.posts.edit', $draft->id) }}" class="btn btn-sm btn-primary">Edit</a>
+                                        <form action="{{ route('author.posts.destroy', $draft->id) }}" method="POST" style="display: inline;">
                                             @csrf
                                             @method('DELETE')
-                                            <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Are you sure you want to delete this post?')">Delete</button>
+                                            <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Are you sure you want to delete this draft?')">Delete</button>
                                         </form>
                                     </td>
                                 </tr>
@@ -90,8 +89,8 @@
                     <a href="{{ route('author.posts.index') }}" class="btn btn-outline-primary">View All Posts</a>
                 </div>
             @else
-                <p>You haven't created any posts yet.</p>
-                <a href="{{ route('author.posts.create') }}" class="btn btn-primary">Create Your First Post</a>
+                <p>No drafts found.</p>
+                <a href="{{ route('author.posts.create') }}" class="btn btn-primary">Create a New Post</a>
             @endif
         </div>
     </div>

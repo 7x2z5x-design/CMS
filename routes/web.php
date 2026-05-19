@@ -112,6 +112,9 @@ Route::middleware(['auth', \App\Http\Middleware\RoleMiddleware::class . ':Author
     Route::get('/posts/{post}/revisions', [AuthorPostController::class, 'revisions'])->name('posts.revisions');
     Route::get('/posts/{post}/revisions/{revision}/compare', [AuthorPostController::class, 'compare'])->name('posts.revisions.compare');
     Route::post('/posts/{post}/restore/{revision}', [AuthorPostController::class, 'restoreRevision'])->name('posts.restore');
+    
+    // Revision History
+    Route::get('/posts/{post}/history', [AuthorPostController::class, 'history'])->name('posts.history');
 });
 
 // Editor routes (protected by authentication and role)
@@ -119,21 +122,34 @@ Route::middleware(['auth', \App\Http\Middleware\RoleMiddleware::class . ':Editor
     // Dashboard
     Route::get('/dashboard', [EditorController::class, 'dashboard'])->name('dashboard');
     
+    // Post Approval
+    Route::post('/posts/{content}/approve', [EditorController::class, 'approvePost'])->name('posts.approve');
+    Route::post('/posts/{content}/reject', [EditorController::class, 'rejectPost'])->name('posts.reject');
+    
+    // Post Editing
+    Route::get('/posts/{content}/edit', [EditorController::class, 'editPost'])->name('posts.edit');
+    Route::put('/posts/{content}/update', [EditorController::class, 'updatePost'])->name('posts.update');
+    
+    // Revision History
+    Route::get('/posts/{content}/revisions', [EditorController::class, 'revisions'])->name('posts.revisions');
+    Route::get('/posts/{content}/revisions/{revision}/view', [EditorController::class, 'viewRevision'])->name('posts.revisions.view');
+    Route::get('/posts/{content}/revisions/{revision1}/compare/{revision2}', [EditorController::class, 'compareRevisions'])->name('posts.revisions.compare');
+    Route::post('/posts/{content}/revisions/{revision}/restore', [EditorController::class, 'restoreRevision'])->name('posts.revisions.restore');
+    
     // Profile Management
-    Route::get('/profile', [ProfileController::class, 'show'])->name('profile');
-    Route::get('/profile/edit', [ProfileController::class, 'edit'])->name('profile.edit');
-    Route::put('/profile', [ProfileController::class, 'update'])->name('profile.update');
+    Route::get('/profile', [EditorController::class, 'profile'])->name('profile');
+    Route::put('/profile', [EditorController::class, 'updateProfile'])->name('profile.update');
     Route::get('/preferences', [EditorController::class, 'preferences'])->name('preferences');
     
     // Content Management
-    Route::resource('posts', EditorPostController::class);
-    Route::resource('pages', EditorPageController::class);
-    Route::resource('comments', EditorCommentController::class);
-    Route::resource('media', EditorMediaController::class);
+    // Route::resource('posts', EditorPostController::class);
+    // Route::resource('pages', EditorPageController::class);
+    // Route::resource('comments', EditorCommentController::class);
+    // Route::resource('media', EditorMediaController::class);
     
     // Editorial
-    Route::resource('categories', EditorCategoryController::class);
-    Route::resource('tags', EditorTagController::class);
+    // Route::resource('categories', EditorCategoryController::class);
+    // Route::resource('tags', EditorTagController::class);
     Route::get('/scheduled', [EditorController::class, 'scheduled'])->name('scheduled.index');
     Route::get('/drafts', [EditorController::class, 'drafts'])->name('drafts.index');
     

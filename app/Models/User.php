@@ -102,4 +102,12 @@ class User extends Authenticatable
     {
         return $this->role === 'Viewer';
     }
+
+    /**
+     * Get the posts for the user.
+     */
+    public function posts()
+    {
+        return $this->hasMany(Content::class, 'user_id');
+    }
 }

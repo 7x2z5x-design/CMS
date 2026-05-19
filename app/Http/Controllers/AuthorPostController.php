@@ -49,18 +49,19 @@ class AuthorPostController extends Controller
         $posts->appends($request->all());
 
         // Get categories and tags for filter dropdowns
-        $categories = \App\Models\Category::orderBy('name')->get();
-        $tags = \App\Models\Tag::orderBy('name')->get();
+        $categories = Category::active()->orderBy('name')->get();
+        $tags = Tag::orderBy('name')->get();
 
         return view('author.posts.index', compact('posts', 'categories', 'tags'));
     }
 
+    
     /**
      * Show the form for creating a new resource.
      */
     public function create()
     {
-        $categories = Category::orderBy('name')->get();
+        $categories = Category::active()->orderBy('name')->get();
         return view('author.posts.create', compact('categories'));
     }
 
@@ -73,7 +74,7 @@ class AuthorPostController extends Controller
             'title' => 'required|string|max:200',
             'content' => 'required|string',
             'tags' => 'nullable|string',
-            'categories' => 'nullable|array',
+            'categories' => 'required|array|min:1',
             'categories.*' => 'exists:categories,id',
             'status' => 'required|in:draft,published,scheduled',
             'published_at' => 'nullable|date|after:now',
@@ -84,23 +85,39 @@ class AuthorPostController extends Controller
         ]);
 
         // Determine status and published_at based on user input
-$status = $request->status;
-$publishedAt = null;
+        $status = $request->status;
+        $publishedAt = null;
 
-if ($request->filled('published_at')) {
-    $publishedAt = $request->published_at;
-    $status = 'scheduled'; // Set status to scheduled if date is provided
-}
+        if ($request->filled('published_at')) {
+            $publishedAt = $request->published_at;
+            $status = 'scheduled'; // Set status to scheduled if date is provided
+        }
 
-// Handle file upload
-$filePath = null;
-if ($request->hasFile('media_file')) {
-    $file = $request->file('media_file');
-    $fileName = time() . '_' . $file->getClientOriginalName();
-    $filePath = $file->storeAs('uploads/media', $fileName, 'public');
-}
+        // Handle file upload
+        $filePath = null;
+        if ($request->hasFile('media_file')) {
+            $file = $request->file('media_file');
+            $fileName = time() . '_' . $file->getClientOriginalName();
+            $filePath = $file->storeAs('uploads/media', $fileName, 'public');
+        }
 
-$post = Content::create([
+        // Calculate and save readability score
+        $readabilityScore = \App\Services\ReadabilityService::calculateScore($request->content);
+
+        // Calculate keyword density if focus keyword is provided
+        $keywordDensity = 0;
+        if ($request->filled('focus_keyword')) {
+            $content = strtolower($request->content);
+            $keyword = strtolower($request->focus_keyword);
+            $totalWords = str_word_count($content);
+            $keywordCount = substr_count($content, $keyword);
+            $keywordDensity = $totalWords > 0 ? round(($keywordCount / $totalWords) * 100, 2) : 0;
+        }
+
+        // Analyze heading structure
+        $headingAnalysis = \App\Services\HeadingAnalysisService::analyzeHeadings($request->content);
+
+        $post = Content::create([
             'title' => $request->title,
             'slug' => Str::slug($request->title) . '-' . uniqid(),
             'description' => $request->content,
@@ -110,12 +127,19 @@ $post = Content::create([
             'published_at' => $publishedAt,
             'file_path' => $filePath,
             'external_url' => $request->external_url,
-            'media_id' => $request->media_id
+            'media_id' => $request->media_id,
+            'readability_score' => $readabilityScore,
+            'focus_keyword' => $request->focus_keyword,
+            'keyword_density' => $keywordDensity,
+            'seo_meta' => json_encode([
+                'headings' => $headingAnalysis['headings'],
+                'counts' => $headingAnalysis['counts'],
+                'issues' => $headingAnalysis['issues']
+            ])
         ]);
 
-        if ($request->has('categories')) {
-            $post->categories()->sync($request->categories);
-        }
+        // Attach categories to the post
+        $post->categories()->attach($request->categories);
 
         // Process tags
         if ($request->filled('tags')) {
@@ -162,7 +186,7 @@ $post = Content::create([
             ->where('content_type', 'post')
             ->firstOrFail();
 
-        $categories = Category::orderBy('name')->get();
+        $categories = Category::active()->orderBy('name')->get();
         return view('author.posts.edit', compact('post', 'categories'));
     }
 
@@ -180,7 +204,7 @@ $post = Content::create([
             'title' => 'required|string|max:200',
             'content' => 'required|string',
             'tags' => 'nullable|string',
-            'categories' => 'nullable|array',
+            'categories' => 'required|array|min:1',
             'categories.*' => 'exists:categories,id',
             'status' => 'required|in:draft,published,scheduled',
             'published_at' => 'nullable|date|after:now',
@@ -191,48 +215,72 @@ $post = Content::create([
         ]);
 
         // Determine status and published_at based on user input
-$status = $request->status;
-$publishedAt = null;
+        $status = $request->status;
+        $publishedAt = null;
 
-if ($request->filled('published_at')) {
-    $publishedAt = $request->published_at;
-    $status = 'scheduled'; // Set status to scheduled if date is provided
-}
+        if ($request->filled('published_at')) {
+            $publishedAt = $request->published_at;
+            $status = 'scheduled'; // Set status to scheduled if date is provided
+        }
 
-// Create revision before updating if content has changed
-if ($post->title != $request->title || $post->description != $request->content) {
-    PostRevision::create([
-        'post_id' => $post->id,
-        'title' => $post->title,
-        'content' => $post->description,
-        'user_id' => auth()->id()
-    ]);
-}
+        // Create revision before updating if content has changed
+        if ($post->title != $request->title || $post->description != $request->content) {
+            PostRevision::create([
+                'post_id' => $post->id,
+                'title' => $post->title,
+                'content' => $post->description,
+                'user_id' => auth()->id()
+            ]);
+        }
 
-// Handle file upload
-$filePath = $post->file_path; // Keep existing file path
-if ($request->hasFile('media_file')) {
-    $file = $request->file('media_file');
-    $fileName = time() . '_' . $file->getClientOriginalName();
-    $filePath = $file->storeAs('uploads/media', $fileName, 'public');
-}
+        // Handle file upload
+        $filePath = $post->file_path;
+        if ($request->hasFile('media_file')) {
+            $file = $request->file('media_file');
+            $fileName = time() . '_' . $file->getClientOriginalName();
+            $filePath = $file->storeAs('uploads/media', $fileName, 'public');
+        }
 
-$post->update([
+        // Calculate and save readability score
+        $readabilityScore = \App\Services\ReadabilityService::calculateScore($request->content);
+
+        // Calculate keyword density if focus keyword is provided
+        $keywordDensity = 0;
+        if ($request->filled('focus_keyword')) {
+            $content = strtolower($request->content);
+            $keyword = strtolower($request->focus_keyword);
+            $totalWords = str_word_count($content);
+            $keywordCount = substr_count($content, $keyword);
+            $keywordDensity = $totalWords > 0 ? round(($keywordCount / $totalWords) * 100, 2) : 0;
+        }
+
+        // Analyze heading structure
+        $headingAnalysis = \App\Services\HeadingAnalysisService::analyzeHeadings($request->content);
+
+        $post->update([
             'title' => $request->title,
+            'slug' => Str::slug($request->title) . '-' . uniqid(),
             'description' => $request->content,
             'content_type' => $request->content_type,
+            'user_id' => auth()->id(),
             'status' => $status,
             'published_at' => $publishedAt,
             'file_path' => $filePath,
             'external_url' => $request->external_url,
-            'media_id' => $request->media_id
+            'media_id' => $request->media_id,
+            'readability_score' => $readabilityScore,
+            'focus_keyword' => $request->focus_keyword,
+            'keyword_density' => $keywordDensity,
+            'seo_meta' => json_encode([
+                'headings' => $headingAnalysis['headings'],
+                'counts' => $headingAnalysis['counts'],
+                'issues' => $headingAnalysis['issues']
+            ])
         ]);
 
-        if ($request->has('categories')) {
-            $post->categories()->sync($request->categories);
-        } else {
-            $post->categories()->detach();
-        }
+        // Detach existing categories and attach new ones
+        $post->categories()->detach();
+        $post->categories()->attach($request->categories);
 
         // Process tags
         if ($request->filled('tags')) {
@@ -290,7 +338,7 @@ $post->update([
     }
 
     /**
-     * Compare a revision with the current post.
+     * Compare two revisions of a post
      */
     public function compare($postId, $revisionId)
     {
@@ -369,8 +417,8 @@ $post->update([
             'content' => $post->description,
             'user_id' => auth()->id()
         ]);
-
-        // Restore the revision content
+        
+        // Update the post with the restored revision data
         $post->update([
             'title' => $revision->title,
             'description' => $revision->content
@@ -386,7 +434,7 @@ $post->update([
         }
 
         return redirect()->route('author.posts.edit', $postId)
-            ->with('success', "Post restored to version from {$revision->formatted_created_at}.");
+            ->with('success', "Post restored to version from {$revision->created_at->format('M d, Y H:i')}.");
     }
 
     /**
@@ -457,7 +505,7 @@ $post->update([
         }
         
         $daysSinceCreation = $post->created_at->diffInDays(now());
-        return $daysSinceCreation > 0 ? round($post->views_count / $daysSinceCreated, 2) : $post->views_count;
+        return $daysSinceCreation > 0 ? round($post->views_count / $daysSinceCreation, 2) : $post->views_count;
     }
 
     /**

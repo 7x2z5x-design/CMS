@@ -19,10 +19,16 @@ class Content extends Model
         'file_path',
         'content_type',
         'user_id',
+        'category_id',
         'status',
         'published_at',
+        'scheduled_at',
         'external_url',
-        'media_id'
+        'media_id',
+        'readability_score',
+        'focus_keyword',
+        'keyword_density',
+        'seo_meta'
     ];
 
 
@@ -33,7 +39,7 @@ class Content extends Model
 
     public function categories()
     {
-        return $this->belongsToMany(Category::class, 'category_content');
+        return $this->belongsToMany(Category::class, 'category_post', 'post_id', 'category_id');
     }
 
 

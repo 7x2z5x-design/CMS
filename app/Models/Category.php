@@ -119,7 +119,7 @@ class Category extends Model
      */
     public function posts()
     {
-        return $this->belongsToMany(Content::class, 'category_content');
+        return $this->belongsToMany(Content::class, 'category_post', 'category_id', 'post_id');
     }
 
     /**

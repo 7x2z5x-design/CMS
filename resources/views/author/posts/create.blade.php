@@ -101,19 +101,16 @@
                 </div>
 
                 <div class="mb-3">
-                    <label class="form-label">Categories</label>
-                    <div class="row">
+                    <label for="categories" class="form-label">Categories <span class="text-danger">*</span></label>
+                    <select name="categories[]" id="categories" class="form-select @error('categories') is-invalid @enderror" required multiple style="background: rgba(255, 255, 255, 0.9); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.2); min-height: 120px;">
                         @foreach($categories as $category)
-                            <div class="col-md-3 col-sm-4 col-6 mb-2">
-                                <div class="form-check">
-                                    <input class="form-check-input" type="checkbox" name="categories[]" value="{{ $category->id }}" id="category_{{ $category->id }}" {{ in_array($category->id, old('categories', [])) ? 'checked' : '' }}>
-                                    <label class="form-check-label" for="category_{{ $category->id }}">
-                                        {{ $category->name }}
-                                    </label>
-                                </div>
-                            </div>
+                            <option value="{{ $category->id }}" {{ in_array($category->id, old('categories', [])) ? 'selected' : '' }}>
+                                {{ $category->name }}
+                            </option>
                         @endforeach
-                    </div>
+                    </select>
+                    <small class="form-text text-muted">Type to search, click to select multiple categories</small>
+                    @error('categories') <div class="invalid-feedback">{{ $message }}</div> @enderror
                 </div>
 
                 <div class="mb-3">
@@ -134,7 +131,7 @@
 
                 <div class="mb-3">
                     <label for="focus_keyword" class="form-label">Focus Keyword</label>
-                    <input type="text" name="focus_keyword" id="focus_keyword" class="form-control @error('focus_keyword') is-invalid" placeholder="Enter your main keyword..." value="{{ old('focus_keyword') }}">
+                    <input type="text" name="focus_keyword" id="focus_keyword" class="form-control @error('focus_keyword') is-invalid @enderror" placeholder="Enter your main keyword..." value="{{ old('focus_keyword') }}">
                     @error('focus_keyword') <div class="invalid-feedback">{{ $message }}</div> @enderror
                 </div>
 
@@ -151,13 +148,6 @@
                             <div class="row">
                                 <div class="col-md-6">
                                     <div class="mb-3">
-                                        <label class="form-label">Focus Keyword</label>
-                                        <input type="text" name="focus_keyword" id="focus_keyword" class="form-control @error('focus_keyword') is-invalid" placeholder="Enter your main keyword..." value="{{ old('focus_keyword') }}">
-                                        @error('focus_keyword') <div class="invalid-feedback">{{ $message }}</div> @enderror
-                                    </div>
-                                </div>
-                                <div class="col-md-6">
-                                    <div class="mb-3">
                                         <small class="text-muted">Keyword Analysis</small>
                                     </div>
                                     <div id="keyword-analysis">
@@ -166,6 +156,29 @@
                                             <small class="text-muted">Enter a keyword to see analysis</small>
                                         </div>
                                     </div>
+                                    <div id="keyword-density">
+                                        <div class="d-flex justify-content-between align-items-center mb-2">
+                                            <span class="badge bg-secondary me-2">0%</span>
+                                            <small class="text-muted">Density</small>
+                                        </div>
+                                    </div>
+                                    <div id="keyword-in-title">
+                                        <div class="d-flex justify-content-between align-items-center mb-2">
+                                            <span class="badge bg-secondary me-2">❌</span>
+                                            <small class="text-muted">Not in Title</small>
+                                        </div>
+                                    </div>
+                                    <div id="keyword-count">
+                                        <div class="d-flex justify-content-between align-items-center mb-2">
+                                            <span class="badge bg-secondary me-2">0</span>
+                                            <small class="text-muted">Count</small>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
                                 </div>
                             </div>
                         </div>
@@ -189,9 +202,30 @@
                                     </div>
                                     <div id="heading-analysis">
                                         <div class="d-flex justify-content-between align-items-center mb-2">
-                                            <span class="badge bg-secondary me-2">No content</span>
-                                            <small class="text-muted">Start typing to see analysis</small>
+                                            @if(isset($seo_meta['headings']))
+                                                <span class="badge bg-secondary me-2">No content</span>
+                                                <small class="text-muted">Start typing to see analysis</small>
+                                            @else
+                                                <span class="badge bg-secondary me-2">No content</span>
+                                                <small class="text-muted">Start typing to see analysis</small>
+                                            @endif
+                                            <div id="heading-structure">
+                                                @if(isset($seo_meta['headings']))
+                                                    @foreach($seo_meta['headings'] as $level => $count)
+                                                        <span class="badge bg-secondary me-2">{{ $level }}: {{ $count }}</span>
+                                                    @endforeach
+                                                @else
+                                                    <span class="badge bg-secondary me-2">No headings found</span>
+                                                    <small class="text-muted">No content to analyze</small>
+                                                @endif
+                                            </div>
                                         </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
                                     </div>
                                 </div>
                                 <div class="col-md-6">
@@ -403,7 +437,7 @@ function updateKeywordAnalysis() {
         <div class="d-flex justify-content-between align-items-center mb-2">
             <span class="badge bg-secondary me-2">${keywordCount}</span>
                 <small class="text-muted">times in Content</small>
-                <span class="badge {{ \App\Services\KeywordAnalysisService::getDensityColor(density) }} me-2">${density}%</span>
+                <span class="badge bg-secondary me-2">${density}%</span>
                 <small class="text-muted">Density</small>
         </div>
         <div class="d-flex justify-content-between align-items-center mb-2">
@@ -501,5 +535,66 @@ function updateHeadingAnalysis() {
         document.getElementById('heading-analysis').innerHTML = analysis;
     }
 }
+<!-- Include Choices.js CSS and JS -->
+<link href="https://cdn.jsdelivr.net/npm/choices.js/public/assets/styles/css/choices.min.css" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/choices.js/public/assets/scripts/choices.min.js"></script>
+
+<script>
+// Initialize Choices.js for enhanced multi-select dropdown
+document.addEventListener('DOMContentLoaded', function() {
+    const categorySelect = document.getElementById('categories');
+    
+    if (categorySelect) {
+        const choices = new Choices(categorySelect, {
+            removeItemButton: true,
+            searchEnabled: true,
+            searchPlaceholderValue: 'Search categories...',
+            searchPlaceholderText: 'Search categories...',
+            noResultsText: 'No categories found',
+            itemSelectText: 'Press to select',
+            maxItemCount: -1, // Allow unlimited selections
+            placeholder: true,
+            placeholderValue: 'Select categories...',
+            classNames: {
+                containerOuter: 'choices choices-glassmorphism',
+                containerInner: 'choices__inner',
+                input: 'choices__input',
+                inputCloned: 'choices__input--cloned',
+                list: 'choices__list',
+                listItems: 'choices__list--multiple',
+                listSingle: 'choices__list--single',
+                listSingleResult: 'choices__list--single-result',
+                listHighlighted: 'choices__list--highlighted',
+                placeholder: 'choices__placeholder',
+                item: 'choices__item',
+                itemSelectable: 'choices__item--selectable',
+                itemDisabled: 'choices__item--disabled',
+                itemChoice: 'choices__item--choice',
+                group: 'choices__group',
+                groupHeading: 'choices__group-heading',
+                button: 'choices__button',
+                activeState: 'is-active',
+                focusState: 'is-focused',
+                openState: 'is-open',
+                disabledState: 'is-disabled',
+                highlightedState: 'is-highlighted',
+                selectedState: 'is-selected',
+                flippedState: 'is-flipped',
+                loadingState: 'is-loading',
+                noResults: 'has-no-results',
+                noChoices: 'has-no-choices'
+            }
+        });
+        
+        // Apply Glassmorphism styling to Choices dropdown
+        const choicesContainer = categorySelect.closest('.choices');
+        if (choicesContainer) {
+            choicesContainer.style.background = 'rgba(255, 255, 255, 0.9)';
+            choicesContainer.style.backdropFilter = 'blur(10px)';
+            choicesContainer.style.border = '1px solid rgba(255, 255, 255, 0.2)';
+            choicesContainer.style.borderRadius = '8px';
+        }
+    }
+});
 </script>
 @endsection

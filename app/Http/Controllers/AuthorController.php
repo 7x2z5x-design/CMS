@@ -29,6 +29,13 @@ class AuthorController extends Controller
             ->take(5)
             ->get();
 
-        return view('author.dashboard', compact('stats', 'latestPosts'));
+        // Get draft posts specifically for the dashboard table
+        $drafts = Content::where('user_id', $userId)
+            ->where('content_type', 'post')
+            ->where('status', 'draft')
+            ->latest()
+            ->get();
+
+        return view('author.dashboard', compact('stats', 'latestPosts', 'drafts'));
     }
 }

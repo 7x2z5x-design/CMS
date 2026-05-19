@@ -31,7 +31,7 @@
                 <div class="col-sm-2">
                     <select name="category_id" class="form-select" style="background: rgba(255, 255, 255, 0.9); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.2);">
                         <option value="">All Categories</option>
-                        @if(isset($categories))
+                        @if(!empty($categories))
                             @foreach($categories as $category)
                                 <option value="{{ $category->id }}" {{ request('category_id') == $category->id ? 'selected' : '' }}>
                                     {{ $category->name }}
@@ -43,7 +43,7 @@
                 <div class="col-sm-2">
                     <select name="tag_id" class="form-select" style="background: rgba(255, 255, 255, 0.9); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.2);">
                         <option value="">All Tags</option>
-                        @if(isset($tags))
+                        @if(!empty($tags))
                             @foreach($tags as $tag)
                                 <option value="{{ $tag->id }}" {{ request('tag_id') == $tag->id ? 'selected' : '' }}>
                                     {{ $tag->name }}
